@@ -1,4 +1,7 @@
-Revision history for Perl extension Foo.
+Revision history for Perl extension Email::Find.
+
+0.02  Tue May 16 21:33:10 EDT 2000
+    * Now works under 5.005_03!  (Kudos to Jeremy Howard)
 
 0.01  Sat Feb 12 01:38:16 EST 2000
     * Released to CPAN
