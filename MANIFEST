@@ -2,4 +2,8 @@ Changes
 MANIFEST
 Makefile.PL
 t/Find.t
+t/RFC822.t
+t/lib/Test/More.pm
+t/lib/Test/Simple.pm
+t/rfc822.txt
 lib/Email/Find.pm

@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 # Need qr//.
 require 5.005;
@@ -13,54 +13,29 @@ use base qw(Exporter);
 use Email::Valid;
 require Mail::Address;
 
-# XXX Boy, does this need to be cleaned up!
 
-# XXX I can probably get these from a module.
-# Build up basic RFC 822 BNF definitions.
-use vars qw($Specials $Space $Char $Ctl $Atom_re $Specials_cheat
-            $Atom_cheat_re
-           );
-$Specials = quotemeta '()<>@,;:\\".[]';
-$Space    = '\040';
-$Char     = '\000-\177';
-$Ctl      = '\000-\037\177';
-$Atom_re  = qq/[^$Ctl$Space$Specials]+/;
-$Specials_cheat = $Specials;
-$Specials_cheat =~ s/\\\.//;
-$Atom_cheat_re = qq/[^$Ctl$Space$Specials_cheat]+/;
+my $esc         = '\\\\';               my $period      = '\.';
+my $space       = '\040';
+my $open_br     = '\[';                 my $close_br    = '\]';
+my $nonASCII    = '\x80-\xff';          my $ctrl        = '\000-\037';
+my $cr_list     = '\n\015';
+my $qtext       = qq/[^$esc$nonASCII$cr_list\"]/;
+my $dtext       = qq/[^$esc$nonASCII$cr_list$open_br$close_br]/;
+my $quoted_pair = qq<$esc>.qq<[^$nonASCII]>;
+my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
+my $atom        = qq<$atom_char+(?!$atom_char)>;
+my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">;
+my $word        = qq<(?:$atom|$quoted_str)>;
+my $domain_ref  = $atom;
+my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
+my $sub_domain  = qq<(?:$domain_ref|$domain_lit)>;
+my $domain      = qq<$sub_domain(?:$period$sub_domain)*>;
+my $local_part  = qq<$word(?:$period$word)*>;
 
-# Build quoted string regex
-use vars qw($Qtext_re $Qpair_re $Quoted_string_re);
-$Qtext_re = '[^"\\\r]+';      # " #
-$Qpair_re = qq/\\\\[$Char]/;
-$Quoted_string_re = qq/"(?:$Qtext_re|$Qpair_re)*"/;
-
-# Build domain regex.
-use vars qw($Domain_ref_re $Dtext_re $Domain_literal_re $Sub_domain_re
-            $Domain_ref_cheat_re $Sub_domain_literal_cheat_re
-            $Domain_literal_cheat_re
-           );
-$Domain_ref_re = $Atom_re;
-$Dtext_re = q/[^\[\]\\\\\r]/;
-$Domain_literal_re = q/\[(?:$Dtext_re|$Qpair_re)*\]/;
-$Sub_domain_re = "(?:$Domain_ref_re|$Domain_literal_re)";
-$Domain_ref_cheat_re = $Atom_cheat_re;
-
-$Sub_domain_literal_cheat_re = "(?:$Dtext_re|$Qpair_re)*";
-$Domain_literal_cheat_re = qq/\\[$Sub_domain_literal_cheat_re\\]/;
-
-# Build local part regex.
-use vars qw($Word_re $Local_part_re $Local_part_cheat_re);
-$Word_re = "(?:$Atom_re|$Quoted_string_re)+";
-$Local_part_re = qq/$Word_re(?:\\.$Word_re)*/;
-$Local_part_cheat_re = qq/(?:$Atom_cheat_re|$Quoted_string_re)+/;
 
 # Finally, the address-spec regex (more or less)
 use vars qw($Addr_spec_re);
- $Addr_spec_re = qr/$Local_part_cheat_re\ ?\@\ ?
-                        (?:$Domain_ref_cheat_re|
-                           $Domain_literal_cheat_re)
-                   /x;
+$Addr_spec_re   = qr<$local_part\s*\@\s*$domain>;
 
 
 
@@ -223,6 +198,8 @@ All rights reserved.
 
 Thanks to Jeremy Howard for his patch to make it work under 5.005.
 
+Many thanks to Tatsuhiko Miyagawa for the much, much faster and
+simpler regex!
 
 =head1 LICENSE
 

@@ -1,5 +1,10 @@
 Revision history for Perl extension Email::Find.
 
+0.04  Thu May 10 00:38:08 BST 2001
+    * Using Tatsuhiko Miyagawa's much faster regex
+    - Now eating my own dog food (using Test::More for testing)
+    - Added test against RFC822
+
 0.03  Thu Dec  7 15:17:53 EST 2000
     - Removed CAVEAT about only working under 5.005
     - Added THANKS doc section
