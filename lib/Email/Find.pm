@@ -11,7 +11,7 @@ $VERSION = 0.01;
 use base qw(Exporter);
 @EXPORT = qw(find_emails);
 
-#use Email::Valid;
+use Email::Valid;
 require Mail::Address;
 
 # XXX Boy, does this need to be cleaned up!
@@ -63,6 +63,11 @@ $Addr_spec_re = qr/$Local_part_cheat_re\@
                           $Domain_literal_cheat_re)
                   /x;
 
+my $validator = Email::Valid->new('-fudge'      => 1,
+                                  '-fqdn'       => 1,
+                                  '-local_rules' => 1,
+                                  '-mxcheck'    => 0,
+                                 );
 
 sub find_emails (\$&) {
     my($r_text, $callback) = @_;
@@ -73,16 +78,22 @@ sub find_emails (\$&) {
         my($orig_match) = $1;
 
         # XXX Add cruft handling.
+        my($start_cruft) = '';
+        my($end_cruft)   = '';
+        if( $orig_match =~ s|([),.'";?!]+)$|| ) { 
+            $end_cruft = $1; 
+        } 
 
-        if( my $email = Mail::Address->new('',$orig_match) ) {
+        if( my $email = $validator->address($orig_match) ) {
+            $email = Mail::Address->new('', $email);
             $emails_found++;
 
-            # XXX Don't forget the cruft.
-            $callback->($email, $orig_match);
+            $start_cruft . $callback->($email, $orig_match) . $end_cruft;
         }
         else {
             # XXX Again with the cruft!
-            $orig_match;
+
+            $start_cruft . $orig_match . $end_cruft;
         }
     }eg;
 
@@ -212,7 +223,20 @@ with 5.005 stable.
 
 =head1 AUTHOR
 
-Michael G Schwern <schwern@pobox.com>
+Copyright 2000, Michael G Schwern <schwern@pobox.com>.
+All rights reserved.
+
+=head1 LICENSE
+
+This module may not be used for the purposes of sending unsolicited
+email (ie. spamming) in any way, shape or form or for the purposes of
+generating lists for commercial sale without explicit permission from
+the author.
+
+For everyone else this module is free software; you may redistribute
+it and/or modify it under the same terms as Perl itself.
+
+
 
 
 =head1 SEE ALSO
