@@ -1,5 +1,5 @@
 use lib qw(t/lib);
-use Test::More tests => 14;
+use Test::More tests => 17;
 BEGIN { use_ok('Email::Find') }
 
 my %Tests;
@@ -9,6 +9,7 @@ BEGIN {
               'What about "@"@foo.com?' => '"@"@foo.com',
               'Eli the Beared <*@qz.to>' => '*@qz.to',
               '"@"+*@[132.205.7.51]'    => '+*@[132.205.7.51]',
+	      'somelongusername@aol.com' => 'somelongusername@aol.com',
              );
 }
 

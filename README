@@ -85,12 +85,11 @@ CAVEATS
         and usenet and email message IDs. I do my best to avoid them, but
         there's only so much cleverness you can pack into one library.
 
-AUTHOR
-    Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>.
+AUTHORS
+    Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>. All rights
+    reserved.
 
-    Copyright 2001 Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
-
-    All rights reserved.
+    Current maintainer is Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
 
 THANKS
     Schwern thanks to Jeremy Howard for his patch to make it work under

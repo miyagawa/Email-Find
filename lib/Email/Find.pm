@@ -39,9 +39,9 @@ $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>;
 
 
 
-my $validator = Email::Valid->new('-fudge'      => 1,
+my $validator = Email::Valid->new('-fudge'      => 0,
                                   '-fqdn'       => 1,
-                                  '-local_rules' => 1,
+                                  '-local_rules' => 0,
                                   '-mxcheck'    => 0,
                                  );
 
@@ -189,13 +189,12 @@ there's only so much cleverness you can pack into one library.
 
 =back
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>.
 All rights reserved.
 
-Copyright 2001 Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
-All rights reserved.
+Current maintainer is Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
 
 =head1 THANKS
 
