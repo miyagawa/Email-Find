@@ -57,10 +57,12 @@ $Local_part_cheat_re = qq/(?:$Atom_cheat_re|$Quoted_string_re)+/;
 
 # Finally, the address-spec regex (more or less)
 use vars qw($Addr_spec_re);
-$Addr_spec_re = qr/$Local_part_cheat_re\@
-                       (?:$Domain_ref_cheat_re|
-                          $Domain_literal_cheat_re)
-                  /x;
+ $Addr_spec_re = qr/$Local_part_cheat_re\ ?\@\ ?
+                        (?:$Domain_ref_cheat_re|
+                           $Domain_literal_cheat_re)
+                   /x;
+
+
 
 my $validator = Email::Valid->new('-fudge'      => 1,
                                   '-fqdn'       => 1,
@@ -72,6 +74,8 @@ sub find_emails (\$&) {
     my($r_text, $callback) = @_;
 
     my $emails_found = 0;
+
+    study($$r_text);
 
     $$r_text =~ s{($Addr_spec_re)}{
         my($orig_match) = $1;
@@ -205,8 +209,8 @@ also the part which contains the information necessary for delivery.
 
 Alas, many things which aren't email addresses I<look> like email
 addresses and parse just fine as them.  The biggest headache is email
-and usenet message IDs.  I do my best to avoid them, but there's only
-so much cleverness you can pack into one library.
+and usenet and email message IDs.  I do my best to avoid them, but
+there's only so much cleverness you can pack into one library.
 
 =back
 
@@ -218,6 +222,7 @@ All rights reserved.
 =head1 THANKS
 
 Thanks to Jeremy Howard for his patch to make it work under 5.005.
+
 
 =head1 LICENSE
 
