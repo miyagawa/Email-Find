@@ -5,14 +5,12 @@
 # - Fill in your dependencies in PREREQ_PM
 # Alternatively, you can say the hell with this and use h2xs.
 
-# Apparently due to the heavy use of qr's embedded in qr's, this module
-# is so slow under 5.005_03 as to be unusable.  5.005_63 is orders of
-# magnitude faster.
-require 5.005_63;       # Ilya++
-
 use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
+
+# Need qr//.
+require 5.005;
 
 $PACKAGE = 'Email::Find';
 my($PACKAGE_FILE) = $PACKAGE =~ /(?:\::)?([^:]+)$/;

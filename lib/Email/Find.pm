@@ -1,12 +1,11 @@
 package Email::Find;
 
-# Sorry, embedded qr//'s appear to be really, really, really slow
-# under 5.005 stable.
-require 5.005_63;
-
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = 0.01;
+$VERSION = '0.02';
+
+# Need qr//.
+require 5.005;
 
 use base qw(Exporter);
 @EXPORT = qw(find_emails);
@@ -25,16 +24,16 @@ $Specials = quotemeta '()<>@,;:\\".[]';
 $Space    = '\040';
 $Char     = '\000-\177';
 $Ctl      = '\000-\037\177';
-$Atom_re  = qr/[^$Ctl$Space$Specials]+/;
+$Atom_re  = qq/[^$Ctl$Space$Specials]+/;
 $Specials_cheat = $Specials;
 $Specials_cheat =~ s/\\\.//;
-$Atom_cheat_re = qr/[^$Ctl$Space$Specials_cheat]+/;
+$Atom_cheat_re = qq/[^$Ctl$Space$Specials_cheat]+/;
 
 # Build quoted string regex
 use vars qw($Qtext_re $Qpair_re $Quoted_string_re);
 $Qtext_re = '[^"\\\r]+';      # " #
-$Qpair_re = qr/\\[$Char]/;
-$Quoted_string_re = qr/"(?:$Qtext_re|$Qpair_re)*"/;
+$Qpair_re = qq/\\\\[$Char]/;
+$Quoted_string_re = qq/"(?:$Qtext_re|$Qpair_re)*"/;
 
 # Build domain regex.
 use vars qw($Domain_ref_re $Dtext_re $Domain_literal_re $Sub_domain_re
@@ -42,19 +41,19 @@ use vars qw($Domain_ref_re $Dtext_re $Domain_literal_re $Sub_domain_re
             $Domain_literal_cheat_re
            );
 $Domain_ref_re = $Atom_re;
-$Dtext_re = qr/[^\[\]\\\r]/;
-$Domain_literal_re = qr/\[(?:$Dtext_re|$Qpair_re)*\]/;
+$Dtext_re = q/[^\[\]\\\\\r]/;
+$Domain_literal_re = q/\[(?:$Dtext_re|$Qpair_re)*\]/;
 $Sub_domain_re = "(?:$Domain_ref_re|$Domain_literal_re)";
 $Domain_ref_cheat_re = $Atom_cheat_re;
 
 $Sub_domain_literal_cheat_re = "(?:$Dtext_re|$Qpair_re)*";
-$Domain_literal_cheat_re = qr/\[$Sub_domain_literal_cheat_re\]/;
+$Domain_literal_cheat_re = qq/\\[$Sub_domain_literal_cheat_re\\]/;
 
 # Build local part regex.
 use vars qw($Word_re $Local_part_re $Local_part_cheat_re);
 $Word_re = "(?:$Atom_re|$Quoted_string_re)+";
-$Local_part_re = qr/$Word_re(?:\.$Word_re)*/;
-$Local_part_cheat_re = qr/(?:$Atom_cheat_re|$Quoted_string_re)+/;
+$Local_part_re = qq/$Word_re(?:\\.$Word_re)*/;
+$Local_part_cheat_re = qq/(?:$Atom_cheat_re|$Quoted_string_re)+/;
 
 # Finally, the address-spec regex (more or less)
 use vars qw($Addr_spec_re);
