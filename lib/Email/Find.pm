@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = '0.08';
+$VERSION = 0.09;
 
 # Need qr//.
 require 5.005;
@@ -11,161 +11,217 @@ use base qw(Exporter);
 @EXPORT = qw(find_emails);
 
 use Email::Valid;
-require Mail::Address;
+use Email::Find::addrspec;
+use Mail::Address;
 
-# This is the BNF from RFC 822
-my $esc         = '\\\\';               my $period      = '\.';
-my $space       = '\040';
-my $open_br     = '\[';                 my $close_br    = '\]';
-my $nonASCII    = '\x80-\xff';          my $ctrl        = '\000-\037';
-my $cr_list     = '\n\015';
-my $qtext       = qq/[^$esc$nonASCII$cr_list\"]/;
-my $dtext       = qq/[^$esc$nonASCII$cr_list$open_br$close_br]/;
-my $quoted_pair = qq<$esc>.qq<[^$nonASCII]>;
-my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
-my $atom        = qq<$atom_char+(?!$atom_char)>;
-my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">;
-my $word        = qq<(?:$atom|$quoted_str)>;
-my $local_part  = qq<$word(?:$period$word)*>; 	#" for emacs
+sub addr_regex { $Addr_spec_re }
 
-# This is a combination of the domain name BNF from RFC 1035 plus the
-# domain literal definition from RFC 822, but allowing domains starting
-# with numbers.
-my $label       = q/[A-Za-z\d](?:[A-Za-z\d-]*[A-Za-z\d])?/;
-my $domain_ref  = qq<$label(?:$period$label)*>;
-my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
-my $domain      = qq<(?:$domain_ref|$domain_lit)>;
+{
+    my $validator = Email::Valid->new(
+	'-fudge'      => 0,
+	'-fqdn'       => 1,
+	'-local_rules' => 0,
+	'-mxcheck'    => 0,
+    );
 
+    sub do_validate {
+	my($self, $addr) = @_;
+	$validator->address($addr);
+    }
+}
 
-# Finally, the address-spec regex (more or less)
-use vars qw($Addr_spec_re);
-$Addr_spec_re   = qr<$local_part\s*\@\s*$domain>;
+sub new {
+    my($proto, $callback) = @_;
+    my $class = ref $proto || $proto;
+    bless { callback => $callback }, $class;
+}
 
-
-
-my $validator = Email::Valid->new('-fudge'      => 0,
-                                  '-fqdn'       => 1,
-                                  '-local_rules' => 0,
-                                  '-mxcheck'    => 0,
-                                 );
-
-sub find_emails (\$&) {
-    my($r_text, $callback) = @_;
+sub find {
+    my($self, $r_text) = @_;
 
     my $emails_found = 0;
-
-    study($$r_text);
-
-    $$r_text =~ s{($Addr_spec_re)}{
-        my($orig_match) = $1;
-
-        # XXX Add cruft handling.
-        my($start_cruft) = '';
-        my($end_cruft)   = '';
-        if( $orig_match =~ s|([),.'";?!]+)$|| ) {
-            $end_cruft = $1;
-        }
-
-        if( my $email = $validator->address($orig_match) ) {
-            $email = Mail::Address->new('', $email);
-            $emails_found++;
-
-            $start_cruft . $callback->($email, $orig_match) . $end_cruft;
-        }
-        else {
-            # XXX Again with the cruft!
-
-            $start_cruft . $orig_match . $end_cruft;
-        }
+    my $re = $self->addr_regex;
+    $$r_text =~ s{($re)}{
+	my($replace, $found) = $self->validate($1);
+	$emails_found += $found;
+	$replace;
     }eg;
-
     return $emails_found;
 }
 
-return '*@qt.to';
+sub validate {
+    my($self, $orig_match) = @_;
 
+    my $replace;
+    my $found = 0;
+
+    # XXX Add cruft handling.
+    my($start_cruft) = '';
+    my($end_cruft)   = '';
+
+
+    if( $orig_match =~ s|([),.'";?!]+)$|| ) { #"')){
+	$end_cruft = $1;
+    }
+    if( my $email = $self->do_validate($orig_match) ) {
+	$email = Mail::Address->new('', $email);
+	$found++;
+	$replace = $start_cruft . $self->{callback}->($email, $orig_match) . $end_cruft;
+    }
+    else {
+	# XXX Again with the cruft!
+	$replace = $start_cruft . $orig_match . $end_cruft;
+    }
+    return $replace, $found;
+}
+
+# backward comaptibility
+sub find_emails(\$&) {
+    my($r_text, $callback) = @_;
+    my $finder = __PACKAGE__->new($callback);
+    $finder->find($r_text);
+}
+
+1;
 __END__
 
 =pod
 
 =head1 NAME
 
-  Email::Find - Find RFC 822 email addresses in plain text
-
+Email::Find - Find RFC 822 email addresses in plain text
 
 =head1 SYNOPSIS
 
   use Email::Find;
-  $num_found = find_emails($text, \&callback);
 
+  # new object oriented interface
+  my $finder = Email::Find->new(\&callback);
+  my $num_found - $finder->find(\$text);
+
+  # good old functional style
+  $num_found = find_emails($text, \&callback);
 
 =head1 DESCRIPTION
 
-This is a module for finding a I<subset> of RFC 822 email addresses in
-arbitrary text (L<CAVEATS>).  The addresses it finds are not
-guaranteed to exist or even actually be email addresses at all
-(L<CAVEATS>), but they will be valid RFC 822 syntax.
+Email::Find is a module for finding a I<subset> of RFC 822 email
+addresses in arbitrary text (see L</"CAVEATS">).  The addresses it
+finds are not guaranteed to exist or even actually be email addresses
+at all (see L</"CAVEATS">), but they will be valid RFC 822 syntax.
 
 Email::Find will perform some heuristics to avoid some of the more
 obvious red herrings and false addresses, but there's only so much
 which can be done without a human.
 
+=head1 METHODS
 
-=head2 Functions
+=over 4
 
-Email::Find exports one function, find_emails().  It works very
-similar to URI::Find's find_uris().
+=item new
 
-  $num_emails_found = find_emails($text, \&callback);
+  $finder = Email::Find->new(\&callback);
 
-The first argument is a block of text for find_emails to search
-through and manipulate.  Second is a callback routine which defines
-what to do with each email as they're found.  It returns the total
-number of emails found.
+Constructs new Email::Find object. Specified callback will be called
+with each email as they're found.
+
+=item find
+
+  $num_emails_found = $finder->find(\$text);
+
+Finds email addresses in the text and executes callback registered.
 
 The callback is given two arguments.  The first is a Mail::Address
 object representing the address found.  The second is the actual
 original email as found in the text.  Whatever the callback returns
 will replace the original text.
 
+=head1 FUNCTIONS
+
+For backward compatibility, Email::Find exports one function,
+find_emails(). It works very similar to URI::Find's find_uris().
 
 =head1 EXAMPLES
 
-  # Simply print out all the addresses found leaving the text undisturbed.
-  find_emails($text, sub {
-                         my($email, $orig_email) = @_;
-                         print "Found ".$email->format."\n";
-                         return $orig_email;
-                     });
+  use Email::Find;
 
+  # Simply print out all the addresses found leaving the text undisturbed.
+  my $finder = Email::Find->new(sub {
+				    my($email, $orig_email) = @_;
+				    print "Found ".$email->format."\n";
+				    return $orig_email;
+				});
+  $finder->find(\$text);
 
   # For each email found, ping its host to see if its alive.
   require Net::Ping;
   $ping = Net::Ping->new;
   my %Pinged = ();
-  find_emails($text, sub {
-                         my($email, $orig_email) = @_;
-                         my $host = $email->host;
-                         next if exists $Pinged{$host};
-                         $Pinged{$host} = $ping->ping($host);
-                     });
+  my $finder = Email::Find->new(sub {
+  				    my($email, $orig_email) = @_;
+  				    my $host = $email->host;
+  				    next if exists $Pinged{$host};
+  				    $Pinged{$host} = $ping->ping($host);
+  				});
+
+  $finder->find(\$text);
 
   while( my($host, $up) = each %Pinged ) {
       print "$host is ". $up ? 'up' : 'down' ."\n";
   }
 
-
   # Count how many addresses are found.
-  print "Found ", find_emails($text, sub { return $_[1] }), " addresses\n";
-
+  my $finder = Email::Find->new(sub { $_[1] });
+  print "Found ", $finder->find(\$text), " addresses\n";
 
   # Wrap each address in an HTML mailto link.
-  find_emails($text, sub {
-                         my($email, $orig_email) = @_;
-                         my($address) = $email->format;
-                         return qq|<a href="mailto:$address">$orig_email</a>|;
-                     });
+  my $finder = Email::Find->new(
+      sub {
+  	  my($email, $orig_email) = @_;
+  	  my($address) = $email->format;
+  	  return qq|<a href="mailto:$address">$orig_email</a>|;
+      },
+  );
+  $finder->find(\$text);
 
+=head1 SUBCLASSING
+
+If you want to change the way this module works in finding email
+address, you can do it by making your subclass of Email::Find, which
+overrides C<addr_regex> and C<do_validate> method.
+
+For example, the following class can additionally find email addresses
+with dot before at mark. This is illegal in RFC822, see
+L<Email::Valid::Loose> for details.
+
+  package Email::Find::Loose;
+  use base qw(Email::Find);
+  use Email::Valid::Loose;
+
+  # should return regex, which Email::Find will use in finding
+  # strings which are "thought to be" email addresses
+  sub addr_regex {
+      return $Email::Valid::Loose::Addr_spec_re;
+  }
+
+  # should validate $addr is a valid email or not.
+  # if so, return the address as a string.
+  # else, return undef
+  sub do_validate {
+      my($self, $addr) = @_;
+      return Email::Valid::Loose->address($addr);
+  }
+
+Let's see another example, which validates if the address is an
+existent one or not, with Mail::CheckUser module.
+
+  package Email::Find::Existent;
+  use base qw(Email::Find);
+  use Mail::CheckUser qw(check_email);
+
+  sub do_validate {
+      my($self, $addr) = @_;
+      return check_email($addr) ? $addr : undef;
+  }
 
 =head1 CAVEATS
 
@@ -195,10 +251,10 @@ there's only so much cleverness you can pack into one library.
 
 =head1 AUTHORS
 
-Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>.
+Copyright 2000, 2001 Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 All rights reserved.
 
-Current maintainer is Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
+Current maintainer is Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>.
 
 =head1 THANKS
 
@@ -224,6 +280,7 @@ you.
 
 =head1 SEE ALSO
 
-L<Email::Valid>, RFC 822, L<URI::Find>, L<Apache::AntiSpam>
+L<Email::Valid>, RFC 822, L<URI::Find>, L<Apache::AntiSpam>,
+L<Email::Valid::Loose>
 
 =cut

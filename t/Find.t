@@ -1,5 +1,5 @@
 use strict;
-use Test::More 'no_plan'; # XXX
+use Test::More tests => 23;
 BEGIN { use_ok('Email::Find') }
 
 my %Tests;

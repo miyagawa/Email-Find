@@ -1,5 +1,8 @@
 Revision history for Perl extension Email::Find.
 
+0.09
+    * Complete rewrite of the module: added new OO interface
+
 0.08  Fri Oct  5 08:35:25 JST 2001
     - Test::Simple and Test::More goes out of the distribution
     * Tighten up the definition of domain to match what's in RFC 1035

@@ -14,7 +14,7 @@ require 5.005;
 
 $PACKAGE = 'Email::Find';
 my($PACKAGE_FILE) = $PACKAGE =~ /(?:\::)?([^:]+)$/;
-$LAST_API_CHANGE = 0;
+$LAST_API_CHANGE = 0.09;
 
 eval "require $PACKAGE";
 
