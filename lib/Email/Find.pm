@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 # Need qr//.
 require 5.005;
@@ -161,7 +161,7 @@ will replace the original text.
                          my($address) = $email->format;
                          return qq|<a href="mailto:$address">$orig_email</a>|;
                      });
-                       
+
 
 =head1 CAVEATS
 
@@ -203,15 +203,21 @@ simpler regex!
 
 =head1 LICENSE
 
-This module may not be used for the purposes of sending unsolicited
-email (ie. spamming) in any way, shape or form or for the purposes of
-generating lists for commercial sale without explicit permission from
-the author.
+This module is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
-For everyone else this module is free software; you may redistribute
-it and/or modify it under the same terms as Perl itself.
+=for _private
+After talking with a few legal people, it was found I can't restrict how
+code is used, only how it is distributed.  Not without making installation
+of the module annoying.  Please don't make me add the annoying installation
+steps.
 
-If you're not sure, contact the author.
+The author B<STRONGLY SUGGESTS> that this module not be used for the
+purposes of sending unsolicited email (ie. spamming) in any way, shape
+or form or for the purposes of generating lists for commercial sale.
+
+If you use this module for spamming I reserve the right to make fun of
+you.
 
 =head1 SEE ALSO
 

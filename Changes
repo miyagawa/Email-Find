@@ -1,5 +1,8 @@
 Revision history for Perl extension Email::Find.
 
+0.05  Sun Jun 24 22:33:18 EDT 2001
+    * Now Freely usable.  The anti-spam license is gone (illegal).
+
 0.04  Thu May 10 00:38:08 BST 2001
     * Using Tatsuhiko Miyagawa's much faster regex
     - Now eating my own dog food (using Test::More for testing)
