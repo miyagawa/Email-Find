@@ -1,5 +1,9 @@
 Revision history for Perl extension Email::Find.
 
+0.03  Thu Dec  7 15:17:53 EST 2000
+    - Removed CAVEAT about only working under 5.005
+    - Added THANKS doc section
+
 0.02  Tue May 16 21:33:10 EDT 2000
     * Now works under 5.005_03!  (Kudos to Jeremy Howard)
 
