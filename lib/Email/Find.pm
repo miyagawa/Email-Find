@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 # Need qr//.
 require 5.005;
@@ -13,7 +13,7 @@ use base qw(Exporter);
 use Email::Valid;
 require Mail::Address;
 
-
+# This is the BNF from RFC 822
 my $esc         = '\\\\';               my $period      = '\.';
 my $space       = '\040';
 my $open_br     = '\[';                 my $close_br    = '\]';
@@ -26,11 +26,15 @@ my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
 my $atom        = qq<$atom_char+(?!$atom_char)>;
 my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">;
 my $word        = qq<(?:$atom|$quoted_str)>;
-my $domain_ref  = $atom;
-my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
-my $sub_domain  = qq<(?:$domain_ref|$domain_lit)>;
-my $domain      = qq<$sub_domain(?:$period$sub_domain)*>;
 my $local_part  = qq<$word(?:$period$word)*>; 	#" for emacs
+
+# This is a combination of the domain name BNF from RFC 1035 plus the
+# domain literal definition from RFC 822, but allowing domains starting
+# with numbers.
+my $label       = q/[A-Za-z\d](?:[A-Za-z\d-]*[A-Za-z\d])?/;
+my $domain_ref  = qq<$label(?:$period$label)*>;
+my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
+my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 
 
 # Finally, the address-spec regex (more or less)
@@ -58,9 +62,9 @@ sub find_emails (\$&) {
         # XXX Add cruft handling.
         my($start_cruft) = '';
         my($end_cruft)   = '';
-        if( $orig_match =~ s|([),.'";?!]+)$|| ) {  #" for emacs
-            $end_cruft = $1; 
-        } 
+        if( $orig_match =~ s|([),.'";?!]+)$|| ) {
+            $end_cruft = $1;
+        }
 
         if( my $email = $validator->address($orig_match) ) {
             $email = Mail::Address->new('', $email);

@@ -1,4 +1,3 @@
-use lib qw(t/lib);
 use Test::More tests => 2;
 
 BEGIN {

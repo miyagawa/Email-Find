@@ -5,6 +5,4 @@ README
 lib/Email/Find.pm
 t/Find.t
 t/RFC822.t
-t/lib/Test/More.pm
-t/lib/Test/Simple.pm
 t/rfc822.txt

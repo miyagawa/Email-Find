@@ -33,9 +33,11 @@ WriteMakefile(
     VERSION_FROM    => "lib/Email/Find.pm", # finds $VERSION
     PREREQ_PM       => { Email::Valid  => 0,
                          Mail::Address => 0,
+			 Test::More    => 0,
                        },
     'dist'          => { COMPRESS   => 'gzip -9',
                          SUFFIX     => '.gz',
                          DIST_DEFAULT   => 'all tardist',
                        },
 );
+

@@ -1,11 +1,16 @@
 Revision history for Perl extension Email::Find.
 
+0.08  Fri Oct  5 08:35:25 JST 2001
+    - Test::Simple and Test::More goes out of the distribution
+    * Tighten up the definition of domain to match what's in RFC 1035
+      Thanks to Michael G Schwern and Gil Vidals
+
 0.07  Tue Jul 31 13:58:30 JST 2001
     * Turned off -local_rules and -fudge for Email::Valid constructor. 
-      Thanks to Joseph Crotty <jcrotty@matchlogic.com>.
+      Thanks to Joseph Crotty.
 
 0.06  Tue Jun 26 19:48:25 JST 2001
-    - Nothing new. Maintainer has switched from Schwern to Miyagawa.
+    - Nothing new. Maintainer has been switched from Schwern to Miyagawa.
 
 0.05  Sun Jun 24 22:33:18 EDT 2001
     * Now Freely usable.  The anti-spam license is gone (illegal).
