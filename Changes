@@ -1,6 +1,6 @@
 Revision history for Perl extension Email::Find.
 
-0.09
+0.09  Sun Jan 13 21:52:11 JST 2002
     * Complete rewrite of the module: added new OO interface
 
 0.08  Fri Oct  5 08:35:25 JST 2001
