@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 # Need qr//.
 require 5.005;
@@ -30,7 +30,7 @@ my $domain_ref  = $atom;
 my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
 my $sub_domain  = qq<(?:$domain_ref|$domain_lit)>;
 my $domain      = qq<$sub_domain(?:$period$sub_domain)*>;
-my $local_part  = qq<$word(?:$period$word)*>;
+my $local_part  = qq<$word(?:$period$word)*>; 	#" for emacs
 
 
 # Finally, the address-spec regex (more or less)
@@ -58,7 +58,7 @@ sub find_emails (\$&) {
         # XXX Add cruft handling.
         my($start_cruft) = '';
         my($end_cruft)   = '';
-        if( $orig_match =~ s|([),.'";?!]+)$|| ) { 
+        if( $orig_match =~ s|([),.'";?!]+)$|| ) {  #" for emacs
             $end_cruft = $1; 
         } 
 
@@ -192,14 +192,14 @@ there's only so much cleverness you can pack into one library.
 =head1 AUTHOR
 
 Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>.
+
+Copyright 2001 Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
+
 All rights reserved.
 
 =head1 THANKS
 
-Thanks to Jeremy Howard for his patch to make it work under 5.005.
-
-Many thanks to Tatsuhiko Miyagawa for the much, much faster and
-simpler regex!
+Schwern thanks to Jeremy Howard for his patch to make it work under 5.005.
 
 =head1 LICENSE
 
