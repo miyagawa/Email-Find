@@ -1,6 +1,7 @@
 Changes
 MANIFEST
 Makefile.PL
+README
 lib/Email/Find.pm
 t/Find.t
 t/RFC822.t

@@ -192,9 +192,9 @@ there's only so much cleverness you can pack into one library.
 =head1 AUTHOR
 
 Copyright 2000, 2001 Michael G Schwern <schwern@pobox.com>.
+All rights reserved.
 
 Copyright 2001 Tatsuhiko Miyagawa <miyagawa@bulknews.net>.
-
 All rights reserved.
 
 =head1 THANKS
