@@ -2,7 +2,7 @@ package Email::Find;
 
 use strict;
 use vars qw($VERSION @EXPORT);
-$VERSION = 0.09;
+$VERSION = "0.10";
 
 # Need qr//.
 require 5.005;

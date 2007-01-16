@@ -31,7 +31,7 @@ CHANGE_WARN
 WriteMakefile(
     NAME            => $PACKAGE,
     VERSION_FROM    => "lib/Email/Find.pm", # finds $VERSION
-    PREREQ_PM       => { Email::Valid  => 0,
+    PREREQ_PM       => { Email::Valid  => 0.179,
                          Mail::Address => 0,
 			 Test::More    => 0,
                        },

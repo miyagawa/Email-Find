@@ -1,15 +1,15 @@
 use strict;
-use Test::More tests => 23;
+use Test::More tests => 17;
 BEGIN { use_ok('Email::Find') }
 
 my %Tests;
 BEGIN {
     %Tests = (
-	'Hahah!  Use "@".+*@[132.205.7.51] and watch them cringe!'
-	    => '"@".+*@[132.205.7.51]',
+#	'Hahah!  Use "@".+*@[132.205.7.51] and watch them cringe!'
+#	    => '"@".+*@[132.205.7.51]',
 	'What about "@"@foo.com?' => '"@"@foo.com',
 	'Eli the Beared <*@qz.to>' => '*@qz.to',
-	'"@"+*@[132.205.7.51]'    => '+*@[132.205.7.51]',
+#	'"@"+*@[132.205.7.51]'    => '+*@[132.205.7.51]',
 	'somelongusername@aol.com' => 'somelongusername@aol.com',
 	'%2Fjoe@123.com' => '%2Fjoe@123.com',
 	'joe@123.com?subject=hello.' => 'joe@123.com',

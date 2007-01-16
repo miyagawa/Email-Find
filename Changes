@@ -1,5 +1,9 @@
 Revision history for Perl extension Email::Find.
 
+0.10  Tue Jan 16 11:42:51 PST 2007
+    * Bumped up Email::Valid requirement to 0.179, and update the
+      tests to skip some invalid email addresses.
+
 0.09  Sun Jan 13 21:52:11 JST 2002
     * Complete rewrite of the module: added new OO interface
 
