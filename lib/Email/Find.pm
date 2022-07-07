@@ -97,7 +97,7 @@ Email::Find - Find RFC 822 email addresses in plain text
 
   # new object oriented interface
   my $finder = Email::Find->new(\&callback);
-  my $num_found - $finder->find(\$text);
+  my $num_found = $finder->find(\$text);
 
   # good old functional style
   $num_found = find_emails($text, \&callback);
